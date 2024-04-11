@@ -1,11 +1,9 @@
 package io.github.wbogler.quarkussocial.rest;
 
 import io.github.wbogler.quarkussocial.domain.domain.UserModel;
+import io.github.wbogler.quarkussocial.repository.user.UserRepository;
 import io.github.wbogler.quarkussocial.rest.dto.CreateUserRequest;
 import io.github.wbogler.quarkussocial.rest.dto.ResponseError;
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
-import io.quarkus.hibernate.validator.runtime.jaxrs.ViolationReport;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
@@ -22,6 +20,9 @@ public class UserResourceController {
     @Inject
     Validator validator;
 
+    @Inject
+    UserRepository userRepository;
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -34,14 +35,13 @@ public class UserResourceController {
         UserModel customer = new UserModel();
         customer.setName(createUserRequest.name());
         customer.setAge(createUserRequest.age());
-        customer.persist();
+        userRepository.persist(customer);
         return Response.ok(customer).build();
     }
 
     @GET
     public Response listUser(){
-        PanacheQuery<PanacheEntityBase> query = UserModel.findAll();
-        return Response.ok(query.list()).build();
+        return Response.ok(userRepository.findAll().stream().toList()).build();
     }
 
 
@@ -49,9 +49,9 @@ public class UserResourceController {
     @Path("{id}")
     @Transactional
     public Response deleteUser(@PathParam("id") Long id){
-        var customer = UserModel.findById(id);
+        var customer = userRepository.findById(id);
         if (customer != null){
-            customer.delete();
+            userRepository.deleteById(id);
             return Response.noContent().build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();
@@ -62,7 +62,7 @@ public class UserResourceController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Transactional
     public Response updateUser(@PathParam("id") Long id, CreateUserRequest createUserRequest){
-        UserModel customer = UserModel.findById(id);
+        UserModel customer = userRepository.findById(id);
         if (customer != null){
             customer.setName(createUserRequest.name());
             customer.setAge(createUserRequest.age());
