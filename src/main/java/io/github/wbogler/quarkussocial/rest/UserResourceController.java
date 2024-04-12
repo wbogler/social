@@ -2,8 +2,8 @@ package io.github.wbogler.quarkussocial.rest;
 
 import io.github.wbogler.quarkussocial.domain.domain.UserModel;
 import io.github.wbogler.quarkussocial.repository.user.UserRepository;
-import io.github.wbogler.quarkussocial.rest.dto.CreateUserRequest;
-import io.github.wbogler.quarkussocial.rest.dto.ResponseError;
+import io.github.wbogler.quarkussocial.rest.dto.user.CreateUserRequest;
+import io.github.wbogler.quarkussocial.rest.dto.error.ResponseError;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
