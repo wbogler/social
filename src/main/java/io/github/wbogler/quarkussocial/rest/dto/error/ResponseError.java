@@ -1,4 +1,4 @@
-package io.github.wbogler.quarkussocial.rest.dto;
+package io.github.wbogler.quarkussocial.rest.dto.error;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.ws.rs.core.Response;
@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;

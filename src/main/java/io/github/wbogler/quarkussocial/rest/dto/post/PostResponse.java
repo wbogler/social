@@ -1,4 +1,4 @@
-package io.github.wbogler.quarkussocial.rest.dto;
+package io.github.wbogler.quarkussocial.rest.dto.post;
 
 import java.time.LocalDateTime;
 

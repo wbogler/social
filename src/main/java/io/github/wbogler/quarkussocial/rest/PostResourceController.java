@@ -2,13 +2,12 @@ package io.github.wbogler.quarkussocial.rest;
 
 import io.github.wbogler.quarkussocial.domain.domain.PostModel;
 import io.github.wbogler.quarkussocial.domain.domain.UserModel;
+import io.github.wbogler.quarkussocial.repository.user.FollowerRepository;
 import io.github.wbogler.quarkussocial.repository.user.PostRepository;
 import io.github.wbogler.quarkussocial.repository.user.UserRepository;
-import io.github.wbogler.quarkussocial.rest.dto.CreateUserRequest;
-import io.github.wbogler.quarkussocial.rest.dto.PostRequest;
-import io.github.wbogler.quarkussocial.rest.dto.PostResponse;
-import io.github.wbogler.quarkussocial.rest.dto.ResponseError;
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
+import io.github.wbogler.quarkussocial.rest.dto.post.PostRequest;
+import io.github.wbogler.quarkussocial.rest.dto.post.PostResponse;
+import io.github.wbogler.quarkussocial.rest.dto.error.ResponseError;
 import io.quarkus.panache.common.Sort;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -29,6 +28,9 @@ public class PostResourceController {
 
     @Inject
     private PostRepository postRepository;
+
+    @Inject
+    private FollowerRepository followerRepository;
 
     @Inject
     private UserRepository userRepository;
@@ -56,8 +58,19 @@ public class PostResourceController {
     }
 
     @GET
-    public Response listPosts(@PathParam("userId")Long id){
+    public Response listPosts(@PathParam("userId")Long id, @HeaderParam("followerId") Long followerId){
         var customer = userRegistry(id);
+        if(followerId == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("You forgot the header").build();
+        }
+        var follower = userRepository.findById(followerId);
+        if(follower == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Inexist follower id").build();
+        }
+        if(!followerRepository.followers(customer,follower)){
+            return Response.status(Response.Status.FORBIDDEN).entity("You cant see these posts").build();
+        }
+
         if(customer!= null){
             var posts = postRepository.find("userModel", Sort.by("postTime", Sort.Direction.Descending), customer).list();
             var postsResponse = posts.stream().map(postModel -> new PostResponse(postModel.getPost(), postModel.getPostTime())).toList();
